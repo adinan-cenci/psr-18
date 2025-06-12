@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 use AdinanCenci\Psr18\Client;
 use AdinanCenci\Psr17\ResponseFactory;
 use AdinanCenci\Psr17\StreamFactory;
@@ -15,7 +16,7 @@ $request = $requestFactory->createRequest('GET', 'https://swapi.dev/api/people/1
 
 try {
     $response = $client->sendRequest($request);
-} catch(\Exception $e) {
+} catch (\Exception $e) {
     echo $e->getMessage();
     die();
 }
@@ -23,4 +24,3 @@ try {
 echo $response->getBody();
 echo '<hr>';
 echo $response->getHeaderLine('security');
-

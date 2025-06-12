@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace AdinanCenci\Psr18;
 
 use Psr\Http\Message\RequestInterface;
@@ -9,12 +10,12 @@ class RequestException extends ClientException implements RequestExceptionInterf
 {
     protected RequestInterface $request;
 
-    public function setRequest(RequestInterface $request) 
+    public function setRequest(RequestInterface $request)
     {
         $this->request = $request;
     }
 
-    public function getRequest(): RequestInterface 
+    public function getRequest(): RequestInterface
     {
         return $this->request;
     }

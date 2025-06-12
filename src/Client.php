@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace AdinanCenci\Psr18;
 
 use Psr\Http\Client\ClientInterface;
@@ -13,13 +14,13 @@ class Client implements ClientInterface
 
     protected StreamFactoryInterface $streamFactory;
 
-    public function __construct(ResponseFactoryInterface $responseFactory, StreamFactoryInterface $streamFactory) 
+    public function __construct(ResponseFactoryInterface $responseFactory, StreamFactoryInterface $streamFactory)
     {
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
     }
 
-    public function sendRequest(RequestInterface $request) : ResponseInterface 
+    public function sendRequest(RequestInterface $request): ResponseInterface
     {
         $requisition = new Requisition($request, $this->responseFactory, $this->streamFactory);
         return $requisition->execute();

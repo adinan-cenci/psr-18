@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace AdinanCenci\Psr18;
 
 use Psr\Http\Client\ClientInterface;
@@ -7,7 +8,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 
-class Requisition 
+class Requisition
 {
     protected RequestInterface $request;
 
@@ -17,14 +18,17 @@ class Requisition
 
     protected \CurlHandle $curl;
 
-    public function __construct(RequestInterface $request, ResponseFactoryInterface $responseFactory, StreamFactoryInterface $streamFactory) 
-    {
+    public function __construct(
+        RequestInterface $request,
+        ResponseFactoryInterface $responseFactory,
+        StreamFactoryInterface $streamFactory
+    ) {
         $this->request         = $request;
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
     }
 
-    public function execute() : ResponseInterface 
+    public function execute(): ResponseInterface
     {
         $this->curl = $this->buildCurl();
         $content  = $this->executeCurl();
@@ -35,7 +39,7 @@ class Requisition
         return $response;
     }
 
-    protected function buildCurl() : \CurlHandle
+    protected function buildCurl(): \CurlHandle
     {
         $curl = curl_init();
 
@@ -55,7 +59,7 @@ class Requisition
         return $curl;
     }
 
-    protected function getPort() : int
+    protected function getPort(): int
     {
         $uri = $this->request->getUri();
         if ($uri->getPort() != null) {
@@ -67,7 +71,7 @@ class Requisition
             : 80;
     }
 
-    protected function executeCurl() : string
+    protected function executeCurl(): string
     {
         $content = curl_exec($this->curl);
 
@@ -83,7 +87,7 @@ class Requisition
         return $content;
     }
 
-    protected function parseContent(string $content) : ResponseInterface
+    protected function parseContent(string $content): ResponseInterface
     {
         $headerSize = curl_getinfo($this->curl, CURLINFO_HEADER_SIZE);
         $headerPart = substr($content, 0, $headerSize);
@@ -101,7 +105,7 @@ class Requisition
         return $response;
     }
 
-    protected function parseHeaders(string $headerPart, ?string &$reasonPhrase = '') : array
+    protected function parseHeaders(string $headerPart, ?string &$reasonPhrase = ''): array
     {
         $lines = explode("\r\n", $headerPart);
         $codeAndPhrase = array_shift($lines);
@@ -123,7 +127,7 @@ class Requisition
         return $headers;
     }
 
-    protected function setHeaders(ResponseInterface $response, array $headers) : ResponseInterface
+    protected function setHeaders(ResponseInterface $response, array $headers): ResponseInterface
     {
         foreach ($headers as $header) {
             $response = $response->hasHeader($header[0])
@@ -134,7 +138,7 @@ class Requisition
         return $response;
     }
 
-    protected function getHeadersArray(RequestInterface $request) : array
+    protected function getHeadersArray(RequestInterface $request): array
     {
         $array = [];
 
@@ -157,7 +161,7 @@ class Requisition
         return $array;
     }
 
-    protected function containFields(array $header) : bool
+    protected function containFields(array $header): bool
     {
         foreach ($header as $h) {
             if (substr_count($h, '=') || substr_count($h, ';')) {
