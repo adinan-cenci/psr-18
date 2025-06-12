@@ -10,14 +10,44 @@ use Psr\Http\Message\StreamFactoryInterface;
 
 class Requisition
 {
+    /**
+     * The request to be made.
+     *
+     * @var Psr\Http\Message\RequestInterface
+     */
     protected RequestInterface $request;
 
+    /**
+     * PSR response factory.
+     *
+     * @var Psr\Http\Message\ResponseFactoryInterface
+     */
     protected ResponseFactoryInterface $responseFactory;
 
+    /**
+     * PSR stream factory.
+     *
+     * @var Psr\Http\Message\StreamFactoryInterface
+     */
     protected StreamFactoryInterface $streamFactory;
 
+    /**
+     * The curl handler.
+     *
+     * @var \CurlHandle
+     */
     protected \CurlHandle $curl;
 
+    /**
+     * Constructor.
+     *
+     * @param Psr\Http\Message\RequestInterface $request
+     *   The request to be made.
+     * @param Psr\Http\Message\ResponseFactoryInterface $responseFactory
+     *   PSR response factory.
+     * @param Psr\Http\Message\StreamFactoryInterface $streamFactory
+     *   PSR stream factory.
+     */
     public function __construct(
         RequestInterface $request,
         ResponseFactoryInterface $responseFactory,
@@ -28,6 +58,14 @@ class Requisition
         $this->streamFactory   = $streamFactory;
     }
 
+    /**
+     * Makes the request.
+     *
+     * And return the response.
+     *
+     * @return Psr\Http\Message\ResponseInterface
+     *   The response object.
+     */
     public function execute(): ResponseInterface
     {
         $this->curl = $this->buildCurl();
@@ -39,6 +77,12 @@ class Requisition
         return $response;
     }
 
+    /**
+     * Builds the curl object out of the request.
+     *
+     * @return \CurlHandle
+     *   The curl handle.
+     */
     protected function buildCurl(): \CurlHandle
     {
         $curl = curl_init();
@@ -59,6 +103,15 @@ class Requisition
         return $curl;
     }
 
+    /**
+     * Returns the port for the request.
+     *
+     * If not specified in the request object it uses the defaults one,
+     * depending on the schema.
+     *
+     * @return int
+     *   The port.
+     */
     protected function getPort(): int
     {
         $uri = $this->request->getUri();
@@ -71,6 +124,12 @@ class Requisition
             : 80;
     }
 
+    /**
+     * Executes the curl handle and returns the content received.
+     *
+     * @return string
+     *   The response.
+     */
     protected function executeCurl(): string
     {
         $content = curl_exec($this->curl);
@@ -87,6 +146,15 @@ class Requisition
         return $content;
     }
 
+    /**
+     * Parses the curl response into a PSR response.
+     *
+     * @param string $content
+     *   The response from curl.
+     *
+     * @return Psr\Http\Message\ResponseInterface
+     *   The response object.
+     */
     protected function parseContent(string $content): ResponseInterface
     {
         $headerSize = curl_getinfo($this->curl, CURLINFO_HEADER_SIZE);
@@ -105,6 +173,11 @@ class Requisition
         return $response;
     }
 
+    /**
+     * Parses a header line into its name and value.
+     *
+     * @p
+     */
     protected function parseHeaders(string $headerPart, ?string &$reasonPhrase = ''): array
     {
         $lines = explode("\r\n", $headerPart);
@@ -127,6 +200,17 @@ class Requisition
         return $headers;
     }
 
+    /**
+     * Adds headers to response.
+     *
+     * @param Psr\Http\Message\ResponseInterface $response
+     *   The response.
+     * @param array $headers
+     *   The headers to add to the response.
+     *
+     * @return Psr\Http\Message\ResponseInterface
+     *   The new response with the headers added.
+     */
     protected function setHeaders(ResponseInterface $response, array $headers): ResponseInterface
     {
         foreach ($headers as $header) {
@@ -138,6 +222,15 @@ class Requisition
         return $response;
     }
 
+    /**
+     * Returns the request's headers a flat array of strings.
+     *
+     * @param Psr\Http\Message\RequestInterface $request
+     *   The request.
+     *
+     * @return array
+     *   The headers as a single dimensional array.
+     */
     protected function getHeadersArray(RequestInterface $request): array
     {
         $array = [];
@@ -161,6 +254,15 @@ class Requisition
         return $array;
     }
 
+    /**
+     * Checks if the values of a header contain fields.
+     *
+     * @param array $header
+     *   Header's values.
+     *
+     * @return bool
+     *   True if there are filds in the header's values.
+     */
     protected function containFields(array $header): bool
     {
         foreach ($header as $h) {
