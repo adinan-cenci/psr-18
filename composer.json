@@ -11,8 +11,8 @@
         }
     },
     "require": {
-        "adinan-cenci/psr-7": "^1.1.3",
-        "adinan-cenci/psr-17": "^1.0",
+        "adinan-cenci/psr-7": ">=1.1.3",
+        "adinan-cenci/psr-17": ">=1.0",
         "psr/http-client": "^1.0"
     },
     "scripts": {

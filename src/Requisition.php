@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 namespace AdinanCenci\Psr18;
 
 use Psr\Http\Client\ClientInterface;
@@ -7,24 +8,65 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 
-class Requisition 
+class Requisition
 {
+    /**
+     * The request to be made.
+     *
+     * @var Psr\Http\Message\RequestInterface
+     */
     protected RequestInterface $request;
 
+    /**
+     * PSR response factory.
+     *
+     * @var Psr\Http\Message\ResponseFactoryInterface
+     */
     protected ResponseFactoryInterface $responseFactory;
 
+    /**
+     * PSR stream factory.
+     *
+     * @var Psr\Http\Message\StreamFactoryInterface
+     */
     protected StreamFactoryInterface $streamFactory;
 
+    /**
+     * The curl handler.
+     *
+     * @var \CurlHandle
+     */
     protected \CurlHandle $curl;
 
-    public function __construct(RequestInterface $request, ResponseFactoryInterface $responseFactory, StreamFactoryInterface $streamFactory) 
-    {
+    /**
+     * Constructor.
+     *
+     * @param Psr\Http\Message\RequestInterface $request
+     *   The request to be made.
+     * @param Psr\Http\Message\ResponseFactoryInterface $responseFactory
+     *   PSR response factory.
+     * @param Psr\Http\Message\StreamFactoryInterface $streamFactory
+     *   PSR stream factory.
+     */
+    public function __construct(
+        RequestInterface $request,
+        ResponseFactoryInterface $responseFactory,
+        StreamFactoryInterface $streamFactory
+    ) {
         $this->request         = $request;
         $this->responseFactory = $responseFactory;
         $this->streamFactory   = $streamFactory;
     }
 
-    public function execute() : ResponseInterface 
+    /**
+     * Makes the request.
+     *
+     * And return the response.
+     *
+     * @return Psr\Http\Message\ResponseInterface
+     *   The response object.
+     */
+    public function execute(): ResponseInterface
     {
         $this->curl = $this->buildCurl();
         $content  = $this->executeCurl();
@@ -35,7 +77,13 @@ class Requisition
         return $response;
     }
 
-    protected function buildCurl() : \CurlHandle
+    /**
+     * Builds the curl object out of the request.
+     *
+     * @return \CurlHandle
+     *   The curl handle.
+     */
+    protected function buildCurl(): \CurlHandle
     {
         $curl = curl_init();
 
@@ -55,7 +103,16 @@ class Requisition
         return $curl;
     }
 
-    protected function getPort() : int
+    /**
+     * Returns the port for the request.
+     *
+     * If not specified in the request object it uses the defaults one,
+     * depending on the schema.
+     *
+     * @return int
+     *   The port.
+     */
+    protected function getPort(): int
     {
         $uri = $this->request->getUri();
         if ($uri->getPort() != null) {
@@ -67,7 +124,13 @@ class Requisition
             : 80;
     }
 
-    protected function executeCurl() : string
+    /**
+     * Executes the curl handle and returns the content received.
+     *
+     * @return string
+     *   The response.
+     */
+    protected function executeCurl(): string
     {
         $content = curl_exec($this->curl);
 
@@ -83,7 +146,16 @@ class Requisition
         return $content;
     }
 
-    protected function parseContent(string $content) : ResponseInterface
+    /**
+     * Parses the curl response into a PSR response.
+     *
+     * @param string $content
+     *   The response from curl.
+     *
+     * @return Psr\Http\Message\ResponseInterface
+     *   The response object.
+     */
+    protected function parseContent(string $content): ResponseInterface
     {
         $headerSize = curl_getinfo($this->curl, CURLINFO_HEADER_SIZE);
         $headerPart = substr($content, 0, $headerSize);
@@ -101,7 +173,12 @@ class Requisition
         return $response;
     }
 
-    protected function parseHeaders(string $headerPart, ?string &$reasonPhrase = '') : array
+    /**
+     * Parses a header line into its name and value.
+     *
+     * @p
+     */
+    protected function parseHeaders(string $headerPart, ?string &$reasonPhrase = ''): array
     {
         $lines = explode("\r\n", $headerPart);
         $codeAndPhrase = array_shift($lines);
@@ -123,7 +200,18 @@ class Requisition
         return $headers;
     }
 
-    protected function setHeaders(ResponseInterface $response, array $headers) : ResponseInterface
+    /**
+     * Adds headers to response.
+     *
+     * @param Psr\Http\Message\ResponseInterface $response
+     *   The response.
+     * @param array $headers
+     *   The headers to add to the response.
+     *
+     * @return Psr\Http\Message\ResponseInterface
+     *   The new response with the headers added.
+     */
+    protected function setHeaders(ResponseInterface $response, array $headers): ResponseInterface
     {
         foreach ($headers as $header) {
             $response = $response->hasHeader($header[0])
@@ -134,7 +222,16 @@ class Requisition
         return $response;
     }
 
-    protected function getHeadersArray(RequestInterface $request) : array
+    /**
+     * Returns the request's headers a flat array of strings.
+     *
+     * @param Psr\Http\Message\RequestInterface $request
+     *   The request.
+     *
+     * @return array
+     *   The headers as a single dimensional array.
+     */
+    protected function getHeadersArray(RequestInterface $request): array
     {
         $array = [];
 
@@ -157,7 +254,16 @@ class Requisition
         return $array;
     }
 
-    protected function containFields(array $header) : bool
+    /**
+     * Checks if the values of a header contain fields.
+     *
+     * @param array $header
+     *   Header's values.
+     *
+     * @return bool
+     *   True if there are filds in the header's values.
+     */
+    protected function containFields(array $header): bool
     {
         foreach ($header as $h) {
             if (substr_count($h, '=') || substr_count($h, ';')) {
