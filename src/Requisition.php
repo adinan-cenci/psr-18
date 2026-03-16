@@ -89,7 +89,7 @@ class Requisition
 
         $options = [
             CURLOPT_PORT           => $this->getPort(),
-            CURLOPT_HTTP_VERSION   => $this->request->getProtocolVersion(),
+            CURLOPT_HTTP_VERSION   => $this->getCurlHttpVersion($this->request->getProtocolVersion()),
             CURLOPT_POSTFIELDS     => (string) $this->request->getBody(),
             CURLOPT_URL            => (string) $this->request->getUri(), //$this->request->getRequestTarget(),
             CURLOPT_HTTPHEADER     => $this->getHeadersArray($this->request),
@@ -272,5 +272,38 @@ class Requisition
         }
 
         return false;
+    }
+
+    /**
+     * Return the correct CRL constant given a http version.
+     *
+     * @param string $version
+     *   Http version.
+     *
+     * @return int
+     *   The corresponding curl option.
+     */
+    protected function getCurlHttpVersion(string $version): int
+    {
+        switch ($version) {
+            case '1':
+            case '1.0':
+                return CURL_HTTP_VERSION_1_0;
+                break;
+            case '1.1':
+                return CURL_HTTP_VERSION_1_1;
+                break;
+            case '2':
+            case '2.0':
+                return CURL_HTTP_VERSION_2;
+                break;
+            case '3':
+            case '3.0':
+                return CURL_HTTP_VERSION_3;
+                break;
+            default:
+                return CURL_HTTP_VERSION_NONE;
+                break;
+        }
     }
 }
